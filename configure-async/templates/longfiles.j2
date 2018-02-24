@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+echo "emptying $2" > $2
+for i in {00..30}; do
+  echo "run $i, $1"
+  echo "run $i for $1" >> $2
+  sleep 1
+done

@@ -1,0 +1,5 @@
+---
+# install-roles.yml
+
+- src: http://materials.example.com/roles-library/student.bash_env.tgz
+  name: student.bash_env

@@ -1,0 +1,17 @@
+- yum:
+    name: "{{ extra_packages }}"
+
+- get_url:
+    url: "http://materials.example.com/task_control/my.cnf"
+    dest: "{{ configure_database_path }}"
+    owner: mysql
+    group: mysql
+    mode: 0644
+    seuser: system_u
+    setype: mysqld_etc_t
+    force: yes
+
+- service:
+    name: "{{ db_service }}"
+    state: started
+    enabled: true

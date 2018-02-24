@@ -1,0 +1,14 @@
+---
+- name: Install the latest versions of httpd and mod_ssl
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - "{{ web_package }}"
+    - "{{ ssl_package }}"
+  when:
+    - inventory_hostname in groups['webservers']
+    - "(ansible_memory_mb['real']['total']) > (memory)"
+- name: Start the service
+  service:
+    name: "{{ web_service }}"
+    state: started

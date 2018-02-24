@@ -1,0 +1,5 @@
+---
+- name: setup personal environment without variable
+  hosts: all
+  roles:
+    - student.myenv

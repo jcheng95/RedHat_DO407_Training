@@ -1,0 +1,31 @@
+---
+# tasks file for student.myenv
+
+- name: check myenv_user default
+  fail:
+    msg: "You must specify the variable 'myenv_user' to use this role!"
+  when: "myenv_user == ''"
+
+- name: install my packages
+  yum:
+      name: "{{ item }}"
+      state: installed
+  with_items: "{{ myenv_packages }}"
+
+- name: copy the profile picture
+  copy:
+    src: profile.png
+    dest: "~{{ myenv_user }}/profile.png"
+
+- name: adding to the .bashrc
+  lineinfile:
+   line: "alias tree='tree -C'"
+   path: "~{{ myenv_user }}/.bashrc"
+
+- name: template out mkcd function
+  template:
+    src: mkcd.sh.j2
+    dest: /etc/profile.d/mkcd.sh
+    owner: root
+    group: root
+    mode: 0644

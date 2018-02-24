@@ -1,0 +1,18 @@
+---
+- yum:
+    name: "{{ fw_package }}"
+    state: latest
+  tags: production
+- service:
+    name: "{{ fw_service }}"
+    state: started
+  tags: production
+- firewalld:
+    service: "{{ item }}"
+    immediate: true
+    permanent: true
+    state: enabled
+  with_items:
+    - http
+    - https
+  tags: production

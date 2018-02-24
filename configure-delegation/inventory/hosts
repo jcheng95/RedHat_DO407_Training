@@ -1,0 +1,5 @@
+[webservers]
+servera.lab.example.com
+
+[proxyservers]
+serverc.lab.example.com

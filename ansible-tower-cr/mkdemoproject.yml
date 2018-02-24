@@ -1,0 +1,28 @@
+---
+- name: Localize Demo Project
+  hosts: tower.lab.example.com
+  remote_user: devops
+  become: yes
+  become_user: root
+  vars:
+    demo_project_dir: /var/lib/awx/projects/_4__demo_project
+    demo_playbook: hello_world.yml
+  tasks:
+  - name: Create Demo Project directory
+    file:
+      path: "{{ demo_project_dir }}"
+      state: directory
+      owner: awx
+      group: awx
+      mode: 0755
+  - name: Create demo playbook
+    copy:
+      src: "/home/student/ansible-tower-cr/{{ demo_playbook }}"
+      dest: "{{ demo_project_dir }}/{{ demo_playbook }}"
+      owner: awx
+      group: awx
+      mode: 0644
+  - name: Modify Demo Project
+    become: no
+    shell: /bin/tower-cli project modify -n 'Demo Project' --scm-type manual --local-path _4__demo_project --scm-update-on-launch n
+    delegate_to: 127.0.0.1

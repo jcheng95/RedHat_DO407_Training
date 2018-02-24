@@ -1,0 +1,5 @@
+[webservers]
+serverb.lab.example.com
+
+[files]
+serverb.lab.example.com

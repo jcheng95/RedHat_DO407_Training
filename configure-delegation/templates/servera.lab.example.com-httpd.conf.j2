@@ -1,0 +1,11 @@
+#{{ ansible_managed }}
+
+NameVirtualHost *:80
+
+<VirtualHost *:80>
+ ServerAdmin root@servera.lab.example.com
+ DocumentRoot /var/www/html
+ ServerName servera.lab.example.com
+ ErrorLog logs/servera.lab.example.com-error_log
+ CustomLog logs/servera.lab.example.com-access_log common 
+</VirtualHost>

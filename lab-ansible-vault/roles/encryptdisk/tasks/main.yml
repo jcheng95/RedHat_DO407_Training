@@ -1,0 +1,51 @@
+---
+# tasks file for chapter9-lab
+  - name: Check if device already unlocked.
+    ignore_errors: True
+    shell: stat /dev/mapper/{{ luks_name }} > /dev/null; echo $?;
+    register: already_unlocked
+
+  - name: Umount volumes
+    shell: umount /dev/mapper/{{ luks_name }} || true
+    when: already_unlocked.stdout == "0"
+
+  - name: Close disk... because of crypting/action requested
+    command: cryptsetup luksClose /dev/mapper/{{ luks_name }}
+    when: already_unlocked.stdout == "0"
+
+  - name: Check if device already unlocked.
+    check_mode: no
+    shell: stat /dev/mapper/{{ luks_name }} > /dev/null; echo $?;
+    register: already_unlocked
+
+  - name: encrypt disk
+    shell: printf {{ luks_pass }} | cryptsetup --verbose luksFormat {{ luks_dev }}
+          
+  - name: open encrypted disk
+    shell: printf {{ luks_pass }} | cryptsetup luksOpen {{ luks_dev }} {{ luks_name }}
+    when: already_unlocked.stdout != "0"
+  
+  - name: Create directory /{{ luks_name }}
+    file: path=/{{ luks_name }} state=directory
+        
+  - name: mkfs on {{ luks_dev }}
+    command: mkfs.xfs /dev/mapper/{{ luks_name }} -f
+  
+  - name: create cryptab file
+    crypttab: name={{ luks_name }} backing_device={{ luks_dev }} state=present
+
+  - name: mount the /dev/mapper/{{ luks_name }}
+    mount: name=/{{ luks_name }} src=/dev/mapper/{{ luks_name }} fstype=xfs state=mounted
+
+  - name: get the keyfile for LUKS key
+    template:
+      src: "{{ luks_key }}"
+      dest: /root/keyfile
+      owner: root
+      group: root
+      mode: 0600
+    when: addkey
+
+  - name: add new keyslot to encrypted disk
+    shell: echo {{ luks_pass }} | cryptsetup luksAddKey {{ luks_dev }} /root/keyfile
+    when: addkey

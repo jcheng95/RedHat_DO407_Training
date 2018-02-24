@@ -1,0 +1,25 @@
+---
+- name: Install postfix
+  yum:
+    name: postfix
+    state: latest
+  tags:
+    - server
+  notify:
+    - start_postfix
+- name: Install dovecot
+  yum:
+    name: dovecot
+    state: latest
+  tags:
+    - client
+  notify:
+    - start_dovecot
+- name: Download main.cf configuration
+  get_url:
+    url: "http://materials.example.com/task_control/main.cf"
+    dest: /etc/postfix/main.cf
+  tags:
+    - server
+  notify:
+    - restart_postfix

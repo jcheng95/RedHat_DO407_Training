@@ -1,0 +1,13 @@
+---
+- name: create user accounts based on the encrypted file
+  hosts: devservers
+  become: true
+  remote_user: devops
+  vars_files:
+    - secret.yml
+  tasks:
+    - name: creating users from secret.yml
+      user:
+        name: "{{ item['name'] }}"
+        password: "{{ item['pw'] | password_hash('sha512') }}"
+      with_items: "{{ newusers }}"

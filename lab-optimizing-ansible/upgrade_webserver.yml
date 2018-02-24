@@ -1,0 +1,51 @@
+---
+- name: Upgrade web server
+  hosts: webservers
+  remote_user: devops
+  become: true
+  serial: 1
+  tasks:
+    - name: Remove the web server from the load balancer pool
+      haproxy:
+        state: disabled
+        backend: app
+        host: "{{ inventory_hostname }}"
+        socket: /var/lib/haproxy/stats
+        wait: true
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['lbserver'] }}"
+    - name: Copy the template
+      template:
+        src: templates/index-ver1.html.j2
+        dest: /var/www/html/index.html
+      register: pageupgrade
+    - name: Restart the web servers
+      command: shutdown -r +1 "Ansible updates triggered"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: pageupgrade['changed']
+    - name: Wait for the web server to reboot
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        state: started
+        delay: 80
+        timeout: 200
+      become: false
+      delegate_to: localhost
+      when: pageupgrade['changed']
+    - name: Wait for port to open up to be listened on
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        state: started
+        port: 80
+        timeout: 20
+    - name: Add the web server to the load balancer pool
+      haproxy:
+        state: enabled
+        backend: app
+        host: "{{ inventory_hostname }}"
+        socket: /var/lib/haproxy/stats
+        wait: true
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['lbserver'] }}"

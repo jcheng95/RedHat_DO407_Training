@@ -1,0 +1,7 @@
+[packages]
+db_package = mariadb-server
+web_package = httpd
+
+[services]
+db_service = mariadb
+web_service = httpd

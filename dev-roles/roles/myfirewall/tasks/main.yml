@@ -1,0 +1,18 @@
+---
+# tasks file for myfirewall
+
+- name: install firewalld
+  yum:
+    name: firewalld
+    state: latest
+- name: start and enable firewalld service
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+- name: firewall services config
+  firewalld:
+    state: enabled
+    immediate: true
+    permanent: true
+    service: "{{ firewall_service }}"

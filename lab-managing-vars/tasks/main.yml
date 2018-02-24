@@ -1,0 +1,19 @@
+---
+  - name: Install the database and web server
+    yum:
+      name: 
+        - "{{ ansible_local['custom']['packages']['db_package'] }}"
+        - "{{ ansible_local['custom']['packages']['web_package'] }}"
+      state: latest
+
+  - name: Start the database service
+    service:
+      name: "{{ ansible_local['custom']['services']['db_service'] }}"
+      state: started
+      enabled: true
+
+  - name: Start the web server service
+    service:
+      name: "{{ ansible_local['custom']['services']['web_service'] }}"
+      state: started
+      enabled: true

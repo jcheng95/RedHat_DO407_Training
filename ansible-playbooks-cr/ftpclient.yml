@@ -1,0 +1,9 @@
+---
+- name: ensure that the command lftp is installed
+  hosts: ftpclients
+  become: true
+  tasks:
+    - name: check for and install the latest version of lftp
+      yum:
+        name: lftp
+        state: latest

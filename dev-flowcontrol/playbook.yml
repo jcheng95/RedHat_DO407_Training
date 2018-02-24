@@ -1,0 +1,27 @@
+---
+- hosts: all
+  vars:
+    db_package: mariadb-server
+    db_service: mariadb
+    db_users:
+      - db_admin
+      - db_user
+    configure_database_path: /etc/my.cnf
+  tasks:
+  - name: Create the MariaDB users
+    user:
+      name: "{{ item }}"
+    with_items: "{{ db_users }}"
+    when: inventory_hostname in groups['databases']
+  - name: Install the database server
+    yum:
+      name: "{{ db_package }}"
+    when: db_package is defined
+  - name: Configure the database software
+    include: configure_database.yml
+    vars:
+      extra_packages:
+        - mariadb-bench
+        - mariadb-libs
+        - mariadb-test
+    when: configure_database_path is defined

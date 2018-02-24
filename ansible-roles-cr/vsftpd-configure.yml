@@ -1,0 +1,52 @@
+---
+- name: configure settings for the ansible-vsftpd role 
+  hosts: ftpservers
+  become: true
+  vars:
+    - vsftpd_anon_root: /mnt/share
+    - vsftpd_local_root: /mnt/share
+  roles:
+    - ansible-vsftpd
+  tasks:
+  - name: Create a GPT disk label on /dev/vdb
+    command: parted --script /dev/vdb mklabel gpt mkpart primary 1MiB 100%
+    args:
+      creates: /dev/vdb1
+
+  - name: Creat the XFS file system on /dev/vdb1
+    filesystem:
+      fstype: xfs
+      dev: /dev/vdb1
+      force: false
+
+  - name: Check that /mnt/share exists
+    file:
+      path: "{{ vsftpd_anon_root }}"
+      state: directory
+
+  - name: Ensures /etc/fstab mounts
+    mount:  
+      path: "{{ vsftpd_anon_root }}"
+      src: /dev/vdb1
+      fstype: xfs
+      boot: true
+      state: mounted
+      dump: 1
+      passno: 2 
+    notify: restart vsftpd
+
+  - name: Check /mnt/share properties
+    file:
+      path: "{{ vsftpd_anon_root }}"
+      owner: root
+      group: root
+      mode: 0755
+      state: directory
+      setype: "{{ vsftpd_setype }}"
+
+  - name: Check that README exists
+    copy:
+      content: "Welcome to the FTP server at {{ ansible_fqdn }}\n"
+      dest: "{{ vsftpd_anon_root }}/README"
+      mode: 0644
+      setype: "{{ vsftpd_setype }}"

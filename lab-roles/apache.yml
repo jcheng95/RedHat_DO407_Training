@@ -1,0 +1,6 @@
+---
+- name: set up apache on serverb
+  hosts: serverb.lab.example.com
+  roles:
+    - role: myapache
+      apache_enable: true

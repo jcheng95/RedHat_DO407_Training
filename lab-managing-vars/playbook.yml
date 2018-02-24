@@ -1,0 +1,29 @@
+---
+- name: Setting up the web server
+  hosts: lamp
+  vars:
+    firewall: firewalld
+  tasks:
+  - name: Include the previously defined variables list
+    include_vars: vars/main.yml
+  - name: Include the previously set up tasks
+    include: tasks/main.yml
+  - name: Install the latest firewall version
+    yum:
+      name: "{{ firewall }}"
+      state: latest
+  - name: Start the firewall service
+    service:
+      name: "{{ firewall }}"
+      state: started
+      enabled: true
+  - name: Set up port 80 to be listened on permanently
+    firewalld:
+      service: http
+      state: enabled
+      immediate: true
+      permanent: true
+  - name: Copy the index.html
+    copy:
+      content: "{{ ansible_fqdn }} ({{ ansible_default_ipv4['address'] }}) has been customized by Ansible\n"
+      dest: "{{ web_root }}/index.html"

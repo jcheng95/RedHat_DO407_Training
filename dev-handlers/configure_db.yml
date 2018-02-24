@@ -1,0 +1,45 @@
+---
+- name: Installing Mariadb server
+  hosts: databases
+  vars:
+    db_packages:
+      - mariadb-server
+      - MySQL-python
+    db_service: mariadb
+    src_file: "http://materials.example.com/task_control/my.cnf.template"
+    dst_file: /etc/my.cnf
+  tasks:
+    - name: Install {{ db_packages }} package
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items: "{{ db_packages }}"
+      notify:
+        - start_service
+    - name: Download and install {{ dst_file }}
+      get_url:
+        url: "{{ src_file }}"
+        dest: "{{ dst_file }}"
+        owner: mysql
+        group: mysql
+        force: yes
+      notify:
+        - restart_service
+        - set_password
+    - name: Set the MySQL password
+      mysql_user:
+        name: root
+        password: redhat
+  handlers:
+    - name: start_service
+      service:
+        name: "{{ db_service }}"
+        state: started
+    - name: restart_service
+      service:
+        name: "{{ db_service }}"
+        state: restarted
+    - name: set_password
+      mysql_user:
+        name: root
+        password: redhat

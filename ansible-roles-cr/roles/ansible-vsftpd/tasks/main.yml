@@ -1,0 +1,35 @@
+---
+- name: check for installed packages
+  yum:
+    name: "{{ vsftpd_packages }}"
+    state: installed
+
+- name: check for running and enabled services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items: "{{ vsftpd_service }}"
+
+- name: load the template
+  template:
+    src: templates/vsftpd.conf.j2
+    dest: "{{ vsftpd_config_file }}"
+    owner: root
+    group: root
+    mode: 0600
+    setype: etc_t
+  notify: restart vsftpd
+
+- name: check that firewalld is started and enabled
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: start up firewalld
+  firewalld:
+    service: ftp
+    state: enabled
+    immediate: true
+    permanent: true

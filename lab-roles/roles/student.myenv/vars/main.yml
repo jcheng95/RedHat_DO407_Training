@@ -1,0 +1,7 @@
+---
+# vars file for student.myenv
+
+myenv_packages:
+  - 'git'
+  - 'tree'
+  - 'vim-enhanced'
